@@ -1,8 +1,8 @@
-export default function Home() {
+export default function Page() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <p className="text-lg font-medium">
-        Home Page - Will redirect to login or game collection based on authentication status
+        Signup Page
       </p>
     </div>
   );
