@@ -6,7 +6,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import FilterSidebar, { GameFilters, initialFilters } from "@/app/ui/games/FilterSidebar";
 import GameCard from "@/app/ui/games/GameCard"
 import { Game } from "../types/game";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 const games: Game[] = [
   { id: 1, name: 'Game 1', type: 0, rating: 1.2, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
@@ -78,15 +78,17 @@ export default function Page() {
                 }}
                 />
           </div>
-          <div className="flex-1 w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {games.map((game) => {
-                      return (
-                        <GameCard key={game.id} game={game}/>
-                      );
-                    })}
-            </div>
-          </div> 
+          <Suspense fallback={<div>Loading...</div>}>
+            <div className="flex-1 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {games.map((game) => {
+                        return (
+                          <GameCard key={game.id} game={game}/>
+                        );
+                      })}
+              </div>
+            </div> 
+          </Suspense>
           {/* Filter shows next cards for desktop */} 
           <div className="hidden md:flex">         
             <FilterSidebar
