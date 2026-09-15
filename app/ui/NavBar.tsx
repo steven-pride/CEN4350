@@ -31,10 +31,10 @@ export default function Navbar() {
     // Dark navbar with shadow
     <nav className="bg-ludavault-blue text-white">
       {/* Max width container with horizontal centering */}
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="w-full mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Home Link */}
-          <Link href="/" className="text-xl font-bold hover:text-gray-300">
+          <Link href="/" className="text-4xl font-bold hover:text-gray-300">
             LudaVault
           </Link>
 
