@@ -3,18 +3,9 @@
 import Link from "next/link";
 import FilterSidebar, { GameFilters, initialFilters } from "@/app/ui/games/FilterSidebar";
 import GameCard from "@/app/ui/games/GameCard"
-import { Game } from "@/app/types/game";
+import { initialGames } from "@/app/types/game";
 import { Suspense, useState } from "react";
 import Search from "@/app/ui/games/Search";
-
-const games: Game[] = [
-  { id: 1, name: 'Game 1', type: 0, rating: 1.2, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-  { id: 2, name: 'Game 2', type: 1, rating: 2.5, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-  { id: 3, name: 'Game 3', type: 1, rating: 3.0, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-  { id: 4, name: 'Game 4', type: 0, rating: 4.1, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-  { id: 5, name: 'Game 5', type: 1, rating: 4.8, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-  { id: 6, name: 'Game 6', type: 0, rating: 5.0, userId: 1, minPlayers: 1, maxPlayers: 4, playTime: 120, weight: 2.8, createdAt: "09-14-2026T12:00:00Z", updatedAt: "09-14-2026T12:00:00Z" },
-];
 
 export default function Page() {
   const [filters, setFilters] = useState<GameFilters>(initialFilters)
@@ -55,7 +46,7 @@ export default function Page() {
           </div>
             <div className="flex-1 w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {games.map((game) => {
+                {initialGames.map((game) => {
                         return (
                           <GameCard key={game.id} game={game}/>
                         );
