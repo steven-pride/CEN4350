@@ -8,10 +8,8 @@ export default function Page() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    displayName: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const [error, setError] = useState("");
@@ -27,17 +25,12 @@ export default function Page() {
     e.preventDefault();
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+    if (!formData.email || !formData.password) {
+      setError("Please fill in both email and password.");
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
-    // Mock signup response (will integrate Supabase Auth in backend milestone)
+    // Mock login response (will integrate Supabase Auth in backend implementation)
     router.push("/games");
   };
 
@@ -47,10 +40,10 @@ export default function Page() {
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl font-bold text-ludavault-gold">
-            Create an Account
+            Welcome Back
           </h1>
           <p className="text-sm">
-            Start cataloging and tracking your board game vault today.
+            Log in to access your LudaVault board game collection.
           </p>
         </div>
 
@@ -61,25 +54,8 @@ export default function Page() {
           </div>
         )}
 
-        {/* Signup Form */}
+        {/* Sign In Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Display Name */}
-          <div>
-            <label htmlFor="displayName" className="block text-sm font-semibold mb-1">
-              Display Name <span className="text-red">*</span>
-            </label>
-            <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              required
-              placeholder="e.g. MeepleMaster"
-              value={formData.displayName}
-              onChange={handleChange}
-              className="filter w-full"
-            />
-          </div>
-
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-semibold mb-1">
@@ -107,25 +83,8 @@ export default function Page() {
               name="password"
               type="password"
               required
-              placeholder="At least 8 characters"
+              placeholder="Enter your password"
               value={formData.password}
-              onChange={handleChange}
-              className="filter w-full"
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-1">
-              Confirm Password <span className="text-red">*</span>
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              placeholder="Re-enter password"
-              value={formData.confirmPassword}
               onChange={handleChange}
               className="filter w-full"
             />
@@ -136,15 +95,15 @@ export default function Page() {
             type="submit"
             className="w-full bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2.5 px-4 rounded-md shadow-xs transition text-center"
           >
-            Sign Up
+            Log In
           </button>
         </form>
 
         {/* Footer Link */}
         <div className="text-center text-sm border-t border-gray-100 pt-4">
-          {"Already have an account? "}
-          <Link href="/login" className="text-blue-700 font-semibold hover:underline">
-            Log In
+          {"Don't have an account? "}
+          <Link href="/signup" className="text-blue-700 font-semibold hover:underline">
+            Sign Up
           </Link>
         </div>
       </div>
