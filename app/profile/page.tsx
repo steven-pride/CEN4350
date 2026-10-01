@@ -7,21 +7,43 @@ import { useRouter } from "next/navigation";
 export default function Page() {
   const router = useRouter();
 
+  const [error, setError] = useState("");
+
   // Mock initial profile data (will sync with Supabase profiles entity)
-  const [profile, setProfile] = useState({
+   const [formData, setFormData] = useState({
     displayName: "BoardGameFanatic",
     email: "gamer@example.com",
     memberSince: "September 2026",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
-  const [displayName, setDisplayName] = useState(profile.displayName);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setProfile((prev) => ({
-      ...prev,
-      displayName: displayName.trim(),
-    }));
+    setError("");
+    let displayName = formData.displayName.trim();
+
+    if(formData.newPassword.length != 0) {
+      if (formData.newPassword !== formData.confirmNewPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+
+      if (formData.newPassword.length < 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+    }
+
+    setFormData({...formData, ["displayName"]:displayName, ["newPassword"]:"", ["confirmNewPassword"]:"", ["currentPassword"]:""} )
   };
 
   const handleSignOut = () => {
@@ -36,30 +58,37 @@ export default function Page() {
         <h1 className="text-2xl font-bold text-ludavault-gold">
           My Profile
         </h1>
-        <p className="mt-1 text-sm sm:text-base">
+        <p className="text-gray-600 mt-1 text-sm sm:text-base">
           Manage your account information and preferences.
         </p>
       </div>
 
       {/* Profile Card & Form */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-xs space-y-6">
+        {/* Error message */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSave} className="space-y-6">
           {/* User Display Name */}
           <div>
             <label htmlFor="displayName" className="block text-sm font-semibold mb-1">
-              Display Name <span className="text-red">*</span>
+              Display Name <span className="text-red-500">*</span>
             </label>
             <input
               id="displayName"
               name="displayName"
               type="text"
               required
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              value={formData.displayName}
+              onChange={handleChange}
               className="filter w-full"
               placeholder="Your display name"
             />
-            <p className="text-xs mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               This name will be visible on your collection and reviews.
             </p>
           </div>
@@ -74,17 +103,69 @@ export default function Page() {
               name="email"
               type="email"
               disabled
-              value={profile.email}
-              className="filter w-full bg-gray-100 cursor-not-allowed"
+              value={formData.email}
+              className="filter w-full bg-gray-100 cursor-not-allowed text-gray-600"
             />
-            <p className="text-xs mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               Managed securely through your Supabase account.
             </p>
           </div>
 
+          {/* New Password */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold mb-1">
+              New Password
+            </label>
+            <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                placeholder="At least 8 characters"
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="filter w-full"
+            />
+          </div>
+
+          {/* Confirm New Password */}
+          { formData.newPassword ? (
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-1">
+              New Confirm Password <span className="text-red-500">*</span>
+            </label>
+            <input
+                id="confirmNewPassword"
+                name="confirmNewPassword"
+                type="password"
+                required
+                placeholder="Re-enter password"
+                value={formData.confirmNewPassword}
+                onChange={handleChange}
+                className="filter w-full"
+            />
+          </div> ) : ( <div/> )}
+
+          {/* Current Password */}
+          { formData.newPassword ? (
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold mb-1">
+              Current Password <span className="text-red-500">*</span>
+            </label>
+            <input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                required
+                placeholder="Enter your current password"
+                value={formData.currentPassword}
+                onChange={handleChange}
+                className="filter w-full"
+            />
+          </div> ) : ( <div/> )}
+
           {/* Member Info */}
-          <div className="pt-2 text-sm border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between gap-1">
-            <span><strong>Member Since:</strong> {profile.memberSince}</span>
+          <div className="pt-2 text-sm text-gray-500 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between gap-1">
+            <span><strong>Member Since:</strong> {formData.memberSince}</span>
           </div>
 
           {/* Action Buttons */}
@@ -108,10 +189,10 @@ export default function Page() {
       {/* Account Actions Card */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h2 className="font-semibold">
+          <h2 className="font-semibold text-gray-800">
             Account Session
           </h2>
-          <p className="text-xs">
+          <p className="text-xs text-gray-500">
             Sign out of your active session on this device.
           </p>
         </div>

@@ -8,12 +8,12 @@ import { usePathname } from 'next/navigation';
 
 const links = [
   {
+    name: 'About',
+    href: '/'
+  },
+  {
     name: 'My Collection',
     href: '/games'
-  },
-  { 
-    name: 'About', 
-    href: '/'
   },
   {
     name: 'Profile',
