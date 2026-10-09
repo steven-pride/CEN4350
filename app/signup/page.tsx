@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
+import { signup } from "../lib/authActions";
 
 export default function Page() {
-  const router = useRouter();
-
   const [formData, setFormData] = useState({
     displayName: "",
     email: "",
@@ -48,27 +45,15 @@ export default function Page() {
 
     setNotification({ type: NotificationType.Info, message: "Creating your account..." });
     
-    const {data, error: signUpError } = await supabase.auth.signUp({
+    const signUpError = await signup({
       email: formData.email,
       password: formData.password,
-      options: {
-        data: {
-          display_name: formData.displayName,
-        },
-      },
+      displayName: formData.displayName,
     });
 
     if (signUpError) {
-      setNotification({ type: NotificationType.Error, message: signUpError.message });
+      setNotification({ type: NotificationType.Error, message: signUpError });
       return;
-    }
-
-    if (data.session) {
-      router.push("/games");
-    } else {
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
     }
   };
 

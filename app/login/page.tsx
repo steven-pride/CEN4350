@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
+import { login } from "@/app/lib/authActions";
+
 
 export default function Page() {
-  const router = useRouter();
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -40,16 +38,10 @@ export default function Page() {
     }
 
     setNotification({ type: NotificationType.Info, message: "Logging in..." });
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
-    });
-
-    if (signInError) {
-      setNotification({ type: NotificationType.Error, message: signInError.message });
+    const signInError = await login(formData);
+     if (signInError) {
+      setNotification({ type: NotificationType.Error, message: signInError });
       return;
-    } else {
-      router.push("/games");
     }
   };
 
