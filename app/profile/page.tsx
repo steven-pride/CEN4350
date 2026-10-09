@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
+import { getUser, updateUserDisplayName, updateUserPassword } from "@/app/lib/profileActions";
+import { logout } from "@/app/lib/authActions";
 
 export default function Page() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function Page() {
 
   useEffect(() => {
   async function loadUserProfile() {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { user, error: userError } = await getUser();
 
     if (userError || !user) {
       router.push("/login");
@@ -59,10 +60,10 @@ export default function Page() {
     e.preventDefault();
     resetNotificationBar();
     const displayName = formData.displayName.trim();
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const { user, error: userError } = await getUser();
 
     if (userError || !user) {
-      router.push("/login");
+      router.push("/signout");
       return;
     }
 
@@ -80,9 +81,7 @@ export default function Page() {
       }
 
       setNotification({ type: NotificationType.Info, message: "Updating profile..." });
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: formData.newPassword,
-      });
+      const { error: updateError } = await updateUserPassword(formData.newPassword, formData.currentPassword);
 
       if (updateError) {
         setNotification({ type: NotificationType.Error, message: "Failed to update password." });
@@ -93,12 +92,8 @@ export default function Page() {
     }
 
     if (displayName !== storedDisplayName) {
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          display_name: displayName,
-        },
-      });
-      
+      const { error: updateError } = await updateUserDisplayName(displayName);
+
       if (updateError) {
         setNotification({ type: NotificationType.Error, message: "Failed to update display name." });
         return;
@@ -109,11 +104,6 @@ export default function Page() {
     }
 
     setFormData({...formData, ["displayName"]:displayName, ["newPassword"]:"", ["confirmNewPassword"]:"", ["currentPassword"]:""} )
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
   };
 
   return (
@@ -262,13 +252,12 @@ export default function Page() {
             Sign out of your active session on this device.
           </p>
         </div>
-        <button
-          onClick={handleSignOut}
+        <Link
+          href="/signout"
           className="w-full sm:w-auto text-red-600 hover:bg-red-50 border border-red-200 font-medium py-2 px-5 rounded-md text-sm transition text-center"
-          disabled={notification.type === NotificationType.Info}
         >
           Sign Out
-        </button>
+        </Link>
       </div>
     </div>
   );
