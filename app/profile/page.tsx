@@ -1,53 +1,118 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabase";
+import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
 
 export default function Page() {
   const router = useRouter();
 
-  const [error, setError] = useState("");
+  const [notification, setNotification] = useState<Notification>({
+    type: NotificationType.None,
+    message: "",
+  });
 
-  // Mock initial profile data (will sync with Supabase profiles entity)
+  // Empty formData object with all fields initialized to empty strings
    const [formData, setFormData] = useState({
-    displayName: "BoardGameFanatic",
-    email: "gamer@example.com",
-    memberSince: "September 2026",
+    displayName: "",
+    email: "",
+    memberSince: "",
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+  async function loadUserProfile() {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      router.push("/login");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      displayName: user.user_metadata?.display_name || "",
+      email: user.email || "",
+      memberSince: user.created_at ? new Date(user.created_at).toLocaleDateString() : "",
+    }));
+  }
+
+  loadUserProfile();
+}, [router]);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const resetNotificationBar = () => {
+    setNotification({ type: NotificationType.None, message: "" });
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    let displayName = formData.displayName.trim();
+    resetNotificationBar();
+    const displayName = formData.displayName.trim();
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      router.push("/login");
+      return;
+    }
+
+    const storedDisplayName = user.user_metadata?.display_name;
 
     if(formData.newPassword.length != 0) {
       if (formData.newPassword !== formData.confirmNewPassword) {
-        setError("Passwords do not match.");
+        setNotification({ type: NotificationType.Error, message: "Passwords do not match." });
         return;
       }
 
       if (formData.newPassword.length < 8) {
-        setError("Password must be at least 8 characters.");
+        setNotification({ type: NotificationType.Error, message: "Password must be at least 8 characters." });
         return;
       }
+
+      setNotification({ type: NotificationType.Info, message: "Updating profile..." });
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: formData.newPassword,
+      });
+
+      if (updateError) {
+        setNotification({ type: NotificationType.Error, message: "Failed to update password." });
+        return;
+      } else {
+        setNotification({ type: NotificationType.Success, message: "Password updated successfully." });
+      }
+    }
+
+    if (displayName !== storedDisplayName) {
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          display_name: displayName,
+        },
+      });
+      
+      if (updateError) {
+        setNotification({ type: NotificationType.Error, message: "Failed to update display name." });
+        return;
+      } else {
+        setNotification({ type: NotificationType.Success, message: "Profile updated successfully." });
+      }
+
     }
 
     setFormData({...formData, ["displayName"]:displayName, ["newPassword"]:"", ["confirmNewPassword"]:"", ["currentPassword"]:""} )
   };
 
-  const handleSignOut = () => {
-    // Mock sign out: route to login
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     router.push("/login");
   };
 
@@ -65,12 +130,8 @@ export default function Page() {
 
       {/* Profile Card & Form */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-xs space-y-6">
-        {/* Error message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
-            {error}
-          </div>
-        )}
+        {/* Notification bar */}
+        <NotificationBar notification={notification} />
 
         <form onSubmit={handleSave} className="space-y-6">
           {/* User Display Name */}
@@ -83,6 +144,7 @@ export default function Page() {
               name="displayName"
               type="text"
               required
+              disabled={notification.type === NotificationType.Info}
               value={formData.displayName}
               onChange={handleChange}
               className="filter w-full"
@@ -120,6 +182,7 @@ export default function Page() {
                 id="newPassword"
                 name="newPassword"
                 type="password"
+                disabled={notification.type === NotificationType.Info}
                 placeholder="At least 8 characters"
                 value={formData.newPassword}
                 onChange={handleChange}
@@ -138,6 +201,7 @@ export default function Page() {
                 name="confirmNewPassword"
                 type="password"
                 required
+                disabled={notification.type === NotificationType.Info}
                 placeholder="Re-enter password"
                 value={formData.confirmNewPassword}
                 onChange={handleChange}
@@ -156,6 +220,7 @@ export default function Page() {
                 name="currentPassword"
                 type="password"
                 required
+                disabled={notification.type === 3}
                 placeholder="Enter your current password"
                 value={formData.currentPassword}
                 onChange={handleChange}
@@ -173,6 +238,7 @@ export default function Page() {
             <button
               type="submit"
               className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center"
+              disabled={notification.type === NotificationType.Info}
             >
               Save Changes
             </button>
@@ -199,6 +265,7 @@ export default function Page() {
         <button
           onClick={handleSignOut}
           className="w-full sm:w-auto text-red-600 hover:bg-red-50 border border-red-200 font-medium py-2 px-5 rounded-md text-sm transition text-center"
+          disabled={notification.type === NotificationType.Info}
         >
           Sign Out
         </button>

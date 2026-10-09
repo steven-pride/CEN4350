@@ -26,6 +26,12 @@ export default function GameCard({ game }: GameCardProps) {
           <p className="text-left font-medium">
             {type}
           </p>
+          <p className="text-left font-medium">
+            Players: {game.minPlayers} - {game.maxPlayers}
+          </p>
+          <p className="text-left font-medium">
+            Play Time: {game.playTime} minutes
+          </p>
           <p className="text-left">
             Rating: <span className="font-semibold">{rating}</span>
           </p>

@@ -43,12 +43,15 @@ export default function FilterSidebar({
       >
         {/* Type Filter */}
         <div>
+          <label htmlFor="filter-game-type" className="font-medium text-sm mb-1 block">
+            Game Type
+          </label>
           <select
             id="filter-game-type"
             value={filters.gameType}
             onChange={(e) => handleChange("gameType", e.target.value)}
             className="filter"
-            aria-label="Filter by Game Type"
+            aria-label="Game Type"
           >
             <option value="all">Type (All)</option>
             <option value="0">Base Game</option>
@@ -58,6 +61,9 @@ export default function FilterSidebar({
 
         {/* Player Count Filter */}
         <div>
+          <label htmlFor="filter-player-count" className="font-medium text-sm mb-1 block">
+            Player Count
+          </label>
           <input
             id="filter-player-count"
             type="number"
@@ -73,11 +79,14 @@ export default function FilterSidebar({
 
         {/* Max Play Time Filter */}
         <div>
+          <label htmlFor="filter-max-playtime" className="font-medium text-sm mb-1 block">
+            Max Play Time (in minutes)
+          </label>
           <input
             id="filter-max-playtime"
             type="number"
             min="1"
-            placeholder="Max Play Time"
+            placeholder="Max Play Time (minutes)"
             value={filters.maxPlayTime}
             onChange={(e) => handleChange("maxPlayTime", e.target.value)}
             className="filter placeholder-gray-400"
@@ -87,6 +96,9 @@ export default function FilterSidebar({
 
         {/* Max Weight Filter */}
         <div>
+          <label htmlFor="filter-max-weight" className="font-medium text-sm mb-1 block">
+            Max Weight (1.0 - 5.0)
+          </label>
           <input
             id="filter-max-weight"
             type="number"
@@ -103,6 +115,9 @@ export default function FilterSidebar({
 
         {/* Minimum Rating Filter */}
         <div>
+          <label htmlFor="filter-min-rating" className="font-medium text-sm mb-1 block">
+            Minimum Rating (1.0 - 5.0)
+          </label>
           <input
             id="filter-min-rating"
             type="number"

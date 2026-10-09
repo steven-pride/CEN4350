@@ -14,6 +14,7 @@ export default function GameForm({ initialData, isEdit = false }: GameFormProps)
   const router = useRouter();
 
   const [formData, setFormData] = useState({
+    id: initialData?.id || "",
     name: initialData?.name || "",
     type: (initialData?.type ?? 0) as GameType,
     minPlayers: initialData?.minPlayers?.toString() || "",
@@ -242,6 +243,13 @@ export default function GameForm({ initialData, isEdit = false }: GameFormProps)
         >
           Cancel
         </Link>
+        {isEdit && (
+        <Link
+          href={`/games/${formData.id}/delete`}
+          className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center"
+        >
+          Delete
+        </Link>)}
       </div>
     </form>
   );
