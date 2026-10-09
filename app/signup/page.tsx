@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabase";
+import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
 
 export default function Page() {
   const router = useRouter();
@@ -14,7 +16,14 @@ export default function Page() {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState("");
+  const [notification, setNotification] = useState<Notification>({
+    type: NotificationType.None,
+    message: "",
+  });
+
+  const resetNotificationBar = () => {
+    setNotification({ type: NotificationType.None, message: "" });
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -23,22 +32,44 @@ export default function Page() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    resetNotificationBar();
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      setNotification({ type: NotificationType.Error, message: "Passwords do not match." });
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setNotification({ type: NotificationType.Error, message: "Password must be at least 8 characters." });
       return;
     }
 
-    // Mock signup response (will integrate Supabase Auth in backend milestone)
-    router.push("/games");
+    setNotification({ type: NotificationType.Info, message: "Creating your account..." });
+    
+    const {data, error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          display_name: formData.displayName,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setNotification({ type: NotificationType.Error, message: signUpError.message });
+      return;
+    }
+
+    if (data.session) {
+      router.push("/games");
+    } else {
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    }
   };
 
   return (
@@ -54,12 +85,8 @@ export default function Page() {
           </p>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
-            {error}
-          </div>
-        )}
+        {/* Notification bar */}
+        <NotificationBar notification={notification} />
 
         {/* Signup Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,6 +100,7 @@ export default function Page() {
               name="displayName"
               type="text"
               required
+              disabled={notification.type === NotificationType.Info}
               placeholder="e.g. MeepleMaster"
               value={formData.displayName}
               onChange={handleChange}
@@ -90,6 +118,7 @@ export default function Page() {
               name="email"
               type="email"
               required
+              disabled={notification.type === NotificationType.Info}
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
@@ -107,6 +136,7 @@ export default function Page() {
               name="password"
               type="password"
               required
+              disabled={notification.type === NotificationType.Info}
               placeholder="At least 8 characters"
               value={formData.password}
               onChange={handleChange}
@@ -124,6 +154,7 @@ export default function Page() {
               name="confirmPassword"
               type="password"
               required
+              disabled={notification.type === NotificationType.Info}
               placeholder="Re-enter password"
               value={formData.confirmPassword}
               onChange={handleChange}
@@ -135,6 +166,7 @@ export default function Page() {
           <button
             type="submit"
             className="w-full bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2.5 px-4 rounded-md shadow-xs transition text-center"
+            disabled={notification.type === NotificationType.Info}
           >
             Sign Up
           </button>

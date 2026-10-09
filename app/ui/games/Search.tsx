@@ -18,13 +18,18 @@ export default function Search() {
   }, 300);
 
   return(
-    <input
-        id="search-title"
-        type="text"
-        placeholder="Title"
-        onChange={ (e) => handleSearch(e.target.value)}
-        defaultValue={searchParams.get('query')?.toString()}
-        className="w-full filter"
-    />
+    <div className="w-full">
+      <label htmlFor="search-title" className="font-medium text-sm mb-1 block">
+        Search by Title
+      </label>
+      <input
+          id="search-title"
+          type="text"
+          placeholder="Title"
+          onChange={ (e) => handleSearch(e.target.value)}
+          defaultValue={searchParams.get('query')?.toString()}
+          className="w-full filter"
+      />
+    </div>
   );
 }
