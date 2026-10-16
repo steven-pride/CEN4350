@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import GameForm from "@/app/ui/games/GameForm";
 import { notFound } from "next/navigation";
 import { Game } from "@/app/types/game";
@@ -58,9 +58,11 @@ export default function Page({
         </div>
       </div>
       <div className="mt-2 mb-2">
-        {game && (
-          <GameForm baseGames={baseGames} initialData={game} isEdit={true} />
-        )}
+        <Suspense fallback={<div>Loading game data...</div>}>
+          {game && (
+            <GameForm baseGames={baseGames} initialData={game} isEdit={true} />
+          )}
+        </Suspense>
       </div>
     </div>
   );
