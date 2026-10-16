@@ -6,11 +6,12 @@ import Link from "next/link";
 import { Game, GameType, initialGames } from "@/app/types/game";
 
 interface GameFormProps {
-  initialData?: Partial<Game>;
+  initialData?: Partial<Game>|null;
+  baseGames?: Game[];
   isEdit?: boolean;
 }
 
-export default function GameForm({ initialData, isEdit = false }: GameFormProps) {
+export default function GameForm({ baseGames = [], initialData, isEdit = false }: GameFormProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -52,10 +53,6 @@ export default function GameForm({ initialData, isEdit = false }: GameFormProps)
       router.push("/games");
     }, 400);
   };
-
-  // Filter base games for expansion selection
-  // Will need to look at Suspense or another way to background load when pulling from real database
-  const baseGames = initialGames.filter((g) => g.type === 0);
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg border border-gray-200 shadow-xs space-y-6">

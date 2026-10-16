@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export interface GameFilters {
   gameType: string;
@@ -21,24 +22,72 @@ export const initialFilters: GameFilters = {
 export default function FilterSidebar({
   onFilterChange,
 }: {
-  onFilterChange: (filters: GameFilters) => void;
+  onFilterChange?: (filters: GameFilters) => void;
 }) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
   // Local state for tracking form input values before submitting
-  const [filters, setFilters] = useState<GameFilters>(initialFilters);
-  
+  const [filters, setFilters] = useState<GameFilters>(() => ({
+    gameType: searchParams.get("gameType") || "all",
+    playerCount: searchParams.get("playerCount") || "",
+    maxPlayTime: searchParams.get("maxPlayTime") || "",
+    maxWeight: searchParams.get("maxWeight") || "",
+    minRating: searchParams.get("minRating") || "",
+  }));
+
   // Updates a single filter field in local state
   const handleChange = (field: keyof GameFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (filters.gameType && filters.gameType !== "all") {
+      params.set("gameType", filters.gameType);
+    } else {
+      params.delete("gameType");
+    }
+
+    if (filters.playerCount) {
+      params.set("playerCount", filters.playerCount);
+    } else {
+      params.delete("playerCount");
+    }
+
+    if (filters.maxPlayTime) {
+      params.set("maxPlayTime", filters.maxPlayTime);
+    } else {
+      params.delete("maxPlayTime");
+    }
+
+    if (filters.maxWeight) {
+      params.set("maxWeight", filters.maxWeight);
+    } else {
+      params.delete("maxWeight");
+    }
+
+    if (filters.minRating) {
+      params.set("minRating", filters.minRating);
+    } else {
+      params.delete("minRating");
+    }
+
+    const queryString = params.toString();
+    replace(queryString ? `${pathname}?${queryString}` : pathname);
+
+    if (onFilterChange) {
+      onFilterChange(filters);
+    }
+  };
 
   return (
     <div className="w-full lg:w-64 shrink-0">
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onFilterChange(filters);
-        }}
+        onSubmit={handleSubmit}
         className="flex flex-col space-y-3 sticky top-4"
       >
         {/* Type Filter */}
