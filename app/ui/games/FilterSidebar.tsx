@@ -44,8 +44,11 @@ export default function FilterSidebar({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Populate params as URL Search Params object from the retrieved query string parameters
     const params = new URLSearchParams(searchParams.toString());
 
+    // Add or delete parameters as changed
     if (filters.gameType && filters.gameType !== "all") {
       params.set("gameType", filters.gameType);
     } else {

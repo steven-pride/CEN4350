@@ -17,6 +17,7 @@ export default function Page({
   useEffect(() => {
     async function fetchGame() {
       try {
+        // Query /api/games/[id] endpoint to retrieve game by id
         const res = await fetch(`/api/games/${id}`);
         if (res.status === 404) {
           notFound();
@@ -28,7 +29,7 @@ export default function Page({
         const data = await res.json();
         setGame(data);
 
-        // Fetch base games for the expansion selection
+        // Query base games for the expansion selection
         const baseGamesRes = await fetch("/api/games/list?gameType=0");
         if (!baseGamesRes.ok) {
           console.error("Failed to load base games from API:", baseGamesRes.statusText);

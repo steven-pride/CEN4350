@@ -6,13 +6,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Create supabase Server Client
     const supabaseClient = await createClient();
     const { id } = await params;
 
+    //Check if id is populated
     if (!id) {
       return NextResponse.json({ error: "Game ID is required" }, { status: 400 });
     }
 
+    // Query game table from database where gameId = id
     const { data, error } = await supabaseClient.from("games").select("*").eq("gameId", id).maybeSingle();
 
     if (error) {
