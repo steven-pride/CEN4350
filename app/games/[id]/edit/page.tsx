@@ -1,32 +1,72 @@
-import GameForm from "@/app/ui/games/GameForm";
-import { getGameById } from "@/app/types/game";
-import { notFound } from 'next/navigation';
+"use client";
 
-export default async function Page({
+import { Suspense, use, useEffect, useState } from "react";
+import GameForm from "@/app/ui/games/GameForm";
+import { notFound } from "next/navigation";
+import { Game } from "@/app/types/game";
+
+export default function Page({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const game = getGameById(id);
+  const { id } = use(params);
+  const [game, setGame] = useState<Game | null>(null);
+  const [baseGames, setBaseGames] = useState<Game[]>([]);
 
-  if(!game)
-  {
-    notFound()
-  }
+  useEffect(() => {
+    async function fetchGame() {
+      try {
+        const res = await fetch(`/api/games/${id}`);
+        if (res.status === 404) {
+          notFound();
+        }
+        if (!res.ok) {
+          console.error("Failed to load game from API:", res.statusText);
+          notFound();
+        }
+        const data = await res.json();
+        setGame(data);
+
+        // Fetch base games for the expansion selection
+        const baseGamesRes = await fetch("/api/games/list?gameType=0");
+        if (!baseGamesRes.ok) {
+          console.error("Failed to load base games from API:", baseGamesRes.statusText);
+          setBaseGames([]);
+        } else {
+          const baseGamesData = await baseGamesRes.json();
+          setBaseGames(baseGamesData);
+        }
+      } catch (err) {
+        console.error("Error fetching game:", err);
+        notFound();
+      } 
+    }
+
+    if (id) {
+      fetchGame();
+    }
+  }, [id]);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl md:text-2x font-bold text-ludavault-gold md:-ml-[34px]">
+          <h1 className="text-xl md:text-2xl font-bold text-ludavault-gold md:-ml-[34px]">
             Edit Game
           </h1>
         </div>
       </div>
       <div className="mt-2 mb-2">
-        <GameForm initialData={game} isEdit={true} />
+        <Suspense fallback={<div>Loading game data...</div>}>
+          {game && (
+            <GameForm baseGames={baseGames} initialData={game} isEdit={true} />
+          )}
+        </Suspense>
       </div>
     </div>
   );
 }
+
+
+

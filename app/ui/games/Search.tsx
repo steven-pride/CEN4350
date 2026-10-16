@@ -7,14 +7,15 @@ export default function Search() {
   const { replace } = useRouter();
   
   const handleSearch = useDebouncedCallback((term) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
 
     if(term) {
-      params.set('query', term);
+      params.set('title', term);
     } else {
-      params.delete('query');
+      params.delete('title');
     }
-    replace(`${pathname}?${params.toString()}`)
+    const queryString = params.toString();
+    replace(queryString ? `${pathname}?${queryString}` : pathname);
   }, 300);
 
   return(
@@ -27,7 +28,7 @@ export default function Search() {
           type="text"
           placeholder="Title"
           onChange={ (e) => handleSearch(e.target.value)}
-          defaultValue={searchParams.get('query')?.toString()}
+          defaultValue={searchParams.get('title')?.toString() || ""}
           className="w-full filter"
       />
     </div>

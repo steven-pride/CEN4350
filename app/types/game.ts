@@ -1,19 +1,22 @@
 export type GameType = 0 | 1;
 
 export interface Game {
-    id: number;
+    id: string | number;
+    gameId?: string;
     name: string;
     type: GameType;
-    userId: number;
+    gameType?: GameType;
+    userId?: string | number | null;
     minPlayers: number;
     maxPlayers: number;
     playTime: number;
     weight: number;
     rating: number;
-    baseGameId?: number | null;
+    baseGameId?: string | number | null;
     notes?: string | null;
-    createdAt: string;
-    updatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
+    modifiedAt?: string;
 }
 
 // Will be removed when backend is implemented
