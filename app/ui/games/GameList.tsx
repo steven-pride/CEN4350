@@ -13,33 +13,10 @@ export function GamesList() {
   useEffect(() => {
     async function fetchGames() {
       try {
-        const params = new URLSearchParams();
-        const title = searchParams.get("title");
-        const gameType = searchParams.get("gameType");
-        const playerCount = searchParams.get("playerCount");
-        const maxPlayTime = searchParams.get("maxPlayTime");
-        const maxWeight = searchParams.get("maxWeight");
-        const minRating = searchParams.get("minRating");
+        // Populate params as URL Search Params object from the retrieved query string parameters
+        const params = new URLSearchParams(searchParams.toString());
 
-        if (title?.trim()) {
-          params.set("title", title.trim());
-        }
-        if (gameType && gameType !== "all") {
-          params.set("gameType", gameType);
-        }
-        if (playerCount) {
-          params.set("playerCount", playerCount);
-        }
-        if (maxPlayTime) {
-          params.set("maxPlayTime", maxPlayTime);
-        }
-        if (maxWeight) {
-          params.set("maxWeight", maxWeight);
-        }
-        if (minRating) {
-          params.set("minRating", minRating);
-        }
-
+        // Query /api/games/list endpoint
         const queryString = params.toString();
         const url = `/api/games/list${queryString ? `?${queryString}` : ""}`;
         const res = await fetch(url);
@@ -78,19 +55,22 @@ export function GamesList() {
             <div className="flex flex-col mb-3">
               <Search/>
             </div>       
+            {/* Using key to track component state */}
             <FilterSidebar key={`mobile-${searchParams.toString()}`} />
           </div>
             <div className="flex-1 w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {games.map((game) => {
                   return (
+                    // Using key to track list of components
                     <GameCard key={game.id} game={game}/>
                   );
                 })}
               </div>
             </div> 
           {/* Filter shows next cards for desktop */} 
-          <div className="hidden md:flex">         
+          <div className="hidden md:flex">    
+            {/* Using key to track component state */}      
             <FilterSidebar key={`desktop-${searchParams.toString()}`} />
           </div>
         </div>

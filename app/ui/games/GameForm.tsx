@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Game, GameType, initialGames } from "@/app/types/game";
+import { Game, GameType } from "@/app/types/game";
 
 interface GameFormProps {
   initialData?: Partial<Game>|null;
