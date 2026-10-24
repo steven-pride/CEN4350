@@ -58,7 +58,7 @@ export default function Page({
           </h1>
         </div>
       </div>
-      <div className="mt-2 mb-2">
+      <div className="mt-2 mb-2" id="editPageGameFormDiv">
         <Suspense fallback={<div>Loading game data...</div>}>
           {game && (
             <GameForm baseGames={baseGames} initialData={game} isEdit={true} />
