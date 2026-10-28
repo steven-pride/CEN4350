@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
+import ConfirmationModal from "@/app/ui/ConfirmationModal";
 import { getUser, updateUserDisplayName, updateUserPassword } from "@/app/lib/profileActions";
 import { logout } from "@/app/lib/authActions";
 
@@ -14,6 +15,8 @@ export default function Page() {
     type: NotificationType.None,
     message: "",
   });
+  const [userId, setUserId] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Empty formData object with all fields initialized to empty strings
    const [formData, setFormData] = useState({
@@ -34,6 +37,7 @@ export default function Page() {
       return;
     }
 
+    setUserId(user.id);
     setFormData((prev) => ({
       ...prev,
       displayName: user.user_metadata?.display_name || "",
@@ -104,6 +108,36 @@ export default function Page() {
     }
 
     setFormData({...formData, ["displayName"]:displayName, ["newPassword"]:"", ["confirmNewPassword"]:"", ["currentPassword"]:""} )
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!userId) return;
+
+    try {
+      setIsDeleting(true);
+      setNotification({ type: NotificationType.Info, message: "Deleting account..." });
+
+      const res = await fetch(`/api/profile/${userId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setIsDeleting(false);
+        throw new Error(errData.error || "Failed to delete account");
+      }
+
+      setIsDeleting(false);
+      await logout();
+    } catch (err: unknown) {
+      console.error("Error deleting account:", err);
+      setIsDeleting(false);
+      if (err instanceof Error) {
+        setNotification({ type: NotificationType.Error, message: err.message });
+      } else {
+        setNotification({ type: NotificationType.Error, message: "An unexpected error occurred while deleting your account" });
+      }
+    }
   };
 
   return (
@@ -227,7 +261,7 @@ export default function Page() {
           <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
             <button
               type="submit"
-              className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center"
+              className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center cursor-pointer disabled:opacity-50"
               disabled={notification.type === NotificationType.Info}
             >
               Save Changes
@@ -238,6 +272,14 @@ export default function Page() {
             >
               Back to Collection
             </Link>
+            <button
+              type="button"
+              onClick={() => setIsDeleting(true)}
+              disabled={notification.type === NotificationType.Info}
+              className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center cursor-pointer disabled:opacity-50"
+            >
+              Delete Account
+            </button>
           </div>
         </form>
       </div>
@@ -259,6 +301,18 @@ export default function Page() {
           Sign Out
         </Link>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleting}
+        title="Delete Account"
+        message="Are you sure you want to delete your account? This will permanently delete your profile and all games in your collection. This action cannot be undone."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setIsDeleting(false)}
+      />
     </div>
   );
 }

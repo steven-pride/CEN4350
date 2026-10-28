@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "./supabase";
+import { createAdminClient } from "./supabaseAdmin";
 
 export async function getUser() {
   const supabase = await createClient()
@@ -60,4 +61,18 @@ export async function updateUserPassword(newPassword: string, existingPassword: 
         return { error: null };
     }
     return { error: "Both new and existing passwords are required." };
+}
+
+export async function deleteUser(id: string) {
+    const supabase = await createAdminClient();
+
+    // Signout current user to invalidate session
+    await supabase.auth.signOut()
+    // Delete user from Supabase auth
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+
+    if (authError) {
+        console.error("Error deleting user:", authError);
+        return { error: "Failed to delete user" };
+    }
 }
