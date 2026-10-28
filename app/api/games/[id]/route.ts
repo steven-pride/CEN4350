@@ -102,3 +102,33 @@ export async function PATCH(
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabaseClient = await createClient();
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json({ error: "Game ID is required" }, { status: 400 });
+    }
+
+    // Delete game from database where gameId = id
+    const { error } = await supabaseClient
+      .from("games")
+      .delete()
+      .eq("gameId", id);
+
+    if (error) {
+      console.error("Error deleting game:", error);
+      return NextResponse.json({ error: "Failed to delete game" }, { status: 500 });
+    }
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Error deleting game:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

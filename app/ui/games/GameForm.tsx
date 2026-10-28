@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Game, GameType } from "@/app/types/game";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
+import ConfirmationModal from "@/app/ui/ConfirmationModal";
 
 interface GameFormProps {
   initialData?: Partial<Game>|null;
@@ -19,6 +20,7 @@ export default function GameForm({ baseGames = [], initialData, isEdit = false }
     type: NotificationType.None,
     message: "",
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const resetNotificationBar = () => {
     setNotification({ type: NotificationType.None, message: "" });
@@ -108,6 +110,37 @@ export default function GameForm({ baseGames = [], initialData, isEdit = false }
       }
 
       // If no error is thrown clear the notification bar and route back to the collections page
+      resetNotificationBar();
+      router.push("/games");
+      router.refresh();
+    } catch (err: unknown) {
+      console.error("Error submitting form:", err);
+      if (err instanceof Error) {
+        setNotification({ type: NotificationType.Error, message: err.message });
+      } else {
+        setNotification({ type: NotificationType.Error, message: "An unexpected error occurred" });
+      }
+    }
+  };
+
+    const handleDelete = async () => {
+    if (!formData.id) return;
+
+    try {
+      setIsDeleting(true);
+      setNotification({ type: NotificationType.Info, message: "Deleting game..." });
+
+      const res = await fetch(`/api/games/${formData.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setIsDeleting(false);
+        throw new Error(errData.error || "Failed to delete game");
+      }
+
+      setIsDeleting(false);
       resetNotificationBar();
       router.push("/games");
       router.refresh();
@@ -320,14 +353,29 @@ export default function GameForm({ baseGames = [], initialData, isEdit = false }
             Cancel
           </Link>
           {isEdit && (
-          <Link
-            href={`/games/${formData.id}/delete`}
-            className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center"
-          >
-            Delete
-          </Link>)}
+            <button
+              type="button"
+              onClick={() => setIsDeleting(true)}
+              disabled={notification.type === NotificationType.Info}
+              className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center cursor-pointer disabled:opacity-50"
+            >
+              Delete
+            </button>
+          )}
         </div>
       </form>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleting}
+        title="Delete Game"
+        message="Are you sure you want to delete this game? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={handleDelete}
+        onCancel={() => setIsDeleting(false)}
+      />
     </div>
     
   );
