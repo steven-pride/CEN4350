@@ -16,9 +16,9 @@ export function GamesList() {
         // Populate params as URL Search Params object from the retrieved query string parameters
         const params = new URLSearchParams(searchParams.toString());
 
-        // Query /api/games/list endpoint
+        // Query /api/games endpoint
         const queryString = params.toString();
-        const url = `/api/games/list${queryString ? `?${queryString}` : ""}`;
+        const url = `/api/games${queryString ? `?${queryString}` : ""}`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();

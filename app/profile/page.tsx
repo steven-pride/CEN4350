@@ -7,6 +7,7 @@ import NotificationBar, { Notification, NotificationType } from "@/app/ui/Notifi
 import ConfirmationModal from "@/app/ui/ConfirmationModal";
 import { getUser, updateUserDisplayName, updateUserPassword } from "@/app/lib/profileActions";
 import { logout } from "@/app/lib/authActions";
+import ChangePasswordModal from "@/app/ui/profile/ChangePasswordModal";
 
 export default function Page() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function Page() {
   });
   const [userId, setUserId] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Empty formData object with all fields initialized to empty strings
    const [formData, setFormData] = useState({
@@ -197,89 +199,49 @@ export default function Page() {
             </p>
           </div>
 
-          {/* New Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold mb-1">
-              New Password
-            </label>
-            <input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                disabled={notification.type === NotificationType.Info}
-                placeholder="At least 8 characters"
-                value={formData.newPassword}
-                onChange={handleChange}
-                className="filter w-full"
-            />
-          </div>
-
-          {/* Confirm New Password */}
-          { formData.newPassword ? (
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-1">
-              New Confirm Password <span className="text-red-500">*</span>
-            </label>
-            <input
-                id="confirmNewPassword"
-                name="confirmNewPassword"
-                type="password"
-                required
-                disabled={notification.type === NotificationType.Info}
-                placeholder="Re-enter password"
-                value={formData.confirmNewPassword}
-                onChange={handleChange}
-                className="filter w-full"
-            />
-          </div> ) : ( <div/> )}
-
-          {/* Current Password */}
-          { formData.newPassword ? (
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold mb-1">
-              Current Password <span className="text-red-500">*</span>
-            </label>
-            <input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                required
-                disabled={notification.type === 3}
-                placeholder="Enter your current password"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                className="filter w-full"
-            />
-          </div> ) : ( <div/> )}
-
           {/* Member Info */}
           <div className="pt-2 text-sm text-gray-500 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between gap-1">
             <span><strong>Member Since:</strong> {formData.memberSince}</span>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-            <button
-              type="submit"
-              className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center cursor-pointer disabled:opacity-50"
-              disabled={notification.type === NotificationType.Info}
-            >
-              Save Changes
-            </button>
-            <Link
-              href="/games"
-              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 font-medium py-2 px-6 rounded-md transition text-center"
-            >
-              Back to Collection
-            </Link>
-            <button
-              type="button"
-              onClick={() => setIsDeleting(true)}
-              disabled={notification.type === NotificationType.Info}
-              className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center cursor-pointer disabled:opacity-50"
-            >
-              Delete Account
-            </button>
+          <div className="flex flex-col sm:flex-row justify-between pt-2 w-full">
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <button
+                  type="submit"
+                  className="w-full sm:w-auto mr-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center cursor-pointer disabled:opacity-50"
+                  disabled={notification.type === NotificationType.Info}
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  resetNotificationBar();
+                  setIsChangingPassword(true);
+                }}
+                disabled={notification.type === NotificationType.Info}
+                className="w-full sm:w-auto mr-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md shadow-xs transition text-center cursor-pointer disabled:opacity-50"
+              >
+                Change Password
+              </button>
+            </div>
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <button
+                  type="button"
+                  onClick={() => setIsDeleting(true)}
+                  disabled={notification.type === NotificationType.Info}
+                  className="w-full sm:w-auto bg-red-700 hover:bg-red-500 ml-auto py-2 px-6 text-white font-medium rounded-md transition text-center cursor-pointer disabled:opacity-50"
+              >
+                Delete Account
+              </button>
+              <Link
+                href="/games"
+                className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 font-medium py-2 px-6 rounded-md transition text-center"
+              >
+                Back to Collection
+              </Link>
+            </div>
           </div>
         </form>
       </div>
@@ -301,6 +263,15 @@ export default function Page() {
           Sign Out
         </Link>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangingPassword}
+        onClose={() => setIsChangingPassword(false)}
+        onSuccess={() => {
+          setNotification({ type: NotificationType.Success, message: "Password updated successfully." });
+        }}
+      />
 
       {/* Confirmation Modal */}
       <ConfirmationModal
