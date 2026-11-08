@@ -11,7 +11,7 @@ const [baseGames, setBaseGames] = useState<Game[]>([]);
     async function fetchBaseGames() {
       try {
         // Query base games for the expansion selection
-        const baseGamesRes = await fetch("/api/games/list?gameType=0");
+        const baseGamesRes = await fetch("/api/games?gameType=0");
         if (!baseGamesRes.ok) {
           console.error("Failed to load base games from API:", baseGamesRes.statusText);
           setBaseGames([]);
