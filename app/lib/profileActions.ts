@@ -72,6 +72,9 @@ export async function deleteUser(id: string) {
     const { error: authError } = await supabase.auth.admin.deleteUser(id);
 
     if (authError) {
+        if (authError.code === "user_not_found" || authError.status === 404) {
+            return;
+        }
         console.error("Error deleting user:", authError);
         return { error: "Failed to delete user" };
     }
