@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import NotificationBar, { Notification, NotificationType } from "@/app/ui/NotificationBar";
 import ConfirmationModal from "@/app/ui/ConfirmationModal";
 import { getUser, updateUserDisplayName, updateUserPassword } from "@/app/lib/profileActions";
-import { logout } from "@/app/lib/authActions";
 import ChangePasswordModal from "@/app/ui/profile/ChangePasswordModal";
 
 export default function Page() {
@@ -130,7 +129,7 @@ export default function Page() {
       }
 
       setIsDeleting(false);
-      await logout();
+      router.replace("/signout");
     } catch (err: unknown) {
       console.error("Error deleting account:", err);
       setIsDeleting(false);
