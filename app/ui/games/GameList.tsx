@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 
 export function GamesList() {
   const searchParams = useSearchParams();
-  const [games, setGames] = useState<Game[]>([]);
+  const [games, setGames] = useState<Game[] | null>(null);
 
   useEffect(() => {
     async function fetchGames() {
@@ -28,11 +28,13 @@ export function GamesList() {
         }
       } catch (err) {
         console.error("Error fetching games:", err);
-      } 
+      }
     }
 
     fetchGames();
   }, [searchParams]);
+
+  const hasFilters = Boolean(searchParams.toString());
 
   return (
       <div>
@@ -60,12 +62,26 @@ export function GamesList() {
           </div>
             <div className="flex-1 w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {games.map((game) => {
-                  return (
+                {!games ? null : games.length > 0 ? (
+                  games.map((game) => (
                     // Using key to track list of components
                     <GameCard key={game.id} game={game}/>
-                  );
-                })}
+                  ))
+                ) : hasFilters ? (
+                  <div className="col-span-full rounded-lg border border-gray-200 bg-white p-8 text-center shadow-xs">
+                    <h2 className="text-lg font-semibold text-ludavault-blue">No games match your current filters</h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Try adjusting your search criteria or clear your filters to see your full collection.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="col-span-full rounded-lg border border-gray-200 bg-white p-8 text-center shadow-xs">
+                    <h2 className="text-lg font-semibold text-ludavault-blue">Your collection is ready for its first game</h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Select Add Game to add a base game to your collection with its player count, play time, weight, and rating. You can add expansions and link them to their base game later.
+                    </p>
+                  </div>
+                )}
               </div>
             </div> 
           {/* Filter shows next cards for desktop */} 

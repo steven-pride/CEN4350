@@ -1,6 +1,10 @@
-import Link from "next/dist/client/link";
+import Link from "next/link";
+import { createClient } from "@/app/lib/supabase";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Page Title & Intro */}
@@ -67,7 +71,7 @@ export default function Home() {
                   {'> 100 Games'}
                 </p>
                 <p className="text-sm">
-                  Manages a large collection with and extensive expansion tracking.
+                  Manages a large collection with extensive expansion tracking.
                 </p>
               </div>
             </div>
@@ -80,21 +84,34 @@ export default function Home() {
             Get Started
           </h2>
           <p className="leading-relaxed text-sm sm:text-base">
-            Create an account or log in to start managing your board game collection today.
+            {user
+              ? "Your board game collection is ready whenever you are."
+              : "Create an account or log in to start managing your board game collection today."}
           </p>
           <div className="flex flex-col gap-4">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 font-medium py-2 px-6 rounded-md shadow-xs transition text-center"
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md transition text-center"
-            >
-              Log In
-            </Link>
+            {user ? (
+              <Link
+                href="/games"
+                className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md transition text-center"
+              >
+                Go to My Collection
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 font-medium py-2 px-6 rounded-md shadow-xs transition text-center"
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto bg-ludavault-gold hover:bg-ludavault-blue text-white font-medium py-2 px-6 rounded-md transition text-center"
+                >
+                  Log In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
