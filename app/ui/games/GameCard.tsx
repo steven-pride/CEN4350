@@ -12,10 +12,10 @@ export default function GameCard({ game }: GameCardProps) {
   const rating = Number(game.rating).toFixed(1);
 
   return (
-    <Link href={`/games/${game.id}/edit`} className="block group">
-      <div className="bg-white rounded-lg border border-gray-200/80 shadow-xs hover:shadow-md hover:bg-blue-100 p-1 flex flex-col justify-between h-40">
+    <Link href={`/games/${game.id}/edit`} className="block group md:h-full">
+      <div className="bg-white rounded-lg border border-gray-200/80 shadow-xs hover:shadow-md hover:bg-blue-100 p-1 flex flex-col justify-between md:h-full min-h-40">
         {/* Game Title */}
-        <div className="text-center my-auto py-2">
+        <div className="text-center py-2">
           <h3 className="font-bold text-lg tracking-tight">
             {game.name}
           </h3>
